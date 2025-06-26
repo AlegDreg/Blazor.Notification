@@ -1,3 +1,13 @@
+using Api.Interfaces;
+using Api.Services;
+using Microsoft.EntityFrameworkCore;
+
+/*
+ 
+    Нужно запустить оба проекта
+
+ */
+
 namespace Api
 {
     public class Program
@@ -6,13 +16,17 @@ namespace Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
 
-            var app = builder.Build();
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=app-db.sqlite"));
 
-            // Configure the HTTP request pipeline.
+            builder.Services.AddScoped<IMessage, MessageService>();
+            builder.Services.AddScoped<IMessageRepository, MessageDbRepository>();
+            builder.Services.AddScoped<IUserConnection, UserConnectionService>();
+            builder.Services.AddScoped<IUserRepository,UserDbRepository>();
+            builder.Services.AddScoped<ISignalrRequest, SignalrService>();
+
+            var app = builder.Build();
 
             app.UseHttpsRedirection();
 
