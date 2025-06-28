@@ -1,0 +1,66 @@
+﻿@page "/login"
+@using UI.Interfaces
+@inject IAuthorize auth
+@inject IWebRequest webReq
+@inject NavigationManager nav
+
+<PageTitle>Авторизация</PageTitle>
+
+<div class="center-container">
+    <RadzenColumn>
+        <h3>Пожалуйста, авторизуйтесь</h3>
+        <RadzenCard>
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Логин</RadzenText>
+            <RadzenTextBox ValueChanged="@(args=> login = args)" Style="width: 100%" @onkeydown="HandleKeyDown" />
+            @if (errorMessage != null)
+            {
+                <span style="color:red">@errorMessage</span>
+            }
+        </RadzenCard>
+
+        <div class="bottom-button">
+            <RadzenButton Text="Авторизация" Click="Auhorize" Disabled="loading" />
+        </div>
+
+    </RadzenColumn>
+</div>
+
+@code {
+    private string? errorMessage;
+    private string? login;
+    private bool loading = false;
+
+    private async void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Auhorize();
+        }
+    }
+
+    private async Task Auhorize()
+    {
+        if (string.IsNullOrWhiteSpace(login))
+        {
+            errorMessage = "Пожалуйста, укажите логин";
+            return;
+        }
+
+        loading = true;
+        await InvokeAsync(StateHasChanged);
+
+        var authResult = await auth.Authorize(login);
+
+        if (authResult != null)
+        {
+            errorMessage = authResult;
+        }
+        else
+        {
+            nav.NavigateTo("/");
+        }
+
+        loading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+}

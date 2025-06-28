@@ -34,8 +34,11 @@ namespace Api.Data.Entity
             return new MessageDTO
             {
                 Message = message.Text,
-                From = message.From,
-                ToLogin = message.To.Login
+                FromLogin = message.From.Login,
+                ToLogin = message.To.Login,
+                DateTime = message.DateSend,
+                Id = message.Id,
+                Readed = message.DateRead != null
             };
         }
     }

@@ -1,8 +1,8 @@
 ﻿using Api.Controllers;
-using Api.Interfaces;
+using Api.Data.Entity;
+using Api.Interfaces.MessageRequests;
 using Microsoft.AspNetCore.SignalR;
 using Shared;
-using Shared.Results;
 
 namespace Api.Services
 {
@@ -10,17 +10,17 @@ namespace Api.Services
     /// Сервис для отправки сообщений по SignalR
     /// </summary>
     /// <param name="hub"></param>
-    public class SignalrService(IHubContext<MessageHub> hub) : ISignalrRequest
+    public class SignalrService(IHubContext<MessageHub> hub) : IMessageNotifyRequests, IMessageDeliveryRequests
     {
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="connectionId"></param>
-        /// <param name="user"></param>
+        /// <param name="exceptConnectionId">Исключаемый айди подключения</param>
+        /// <param name="message"></param>
         /// <returns></returns>
-        public Task SendAuthResult(string connectionId, AuthResult authResult)
+        public Task SendNotifyPush(string exceptConnectionId, MessageDTO message)
         {
-            return hub.Clients.Client(connectionId).SendCoreAsync("AuthResult", [authResult]);
+            return hub.Clients.AllExcept(exceptConnectionId).SendAsync("NotifyPush", message);
         }
         /// <summary>
         /// <inheritdoc/>
@@ -28,19 +28,28 @@ namespace Api.Services
         /// <param name="connectionId">Айди подключения</param>
         /// <param name="message">Текст сообщения</param>
         /// <returns></returns>
-        public Task<Ping> SendPush(string connectionId, MessageDTO message)
+        public Task SendPush(string connectionId, MessageDTO message)
         {
-            return hub.Clients.Client(connectionId).InvokeCoreAsync<Ping>("NewUserMessage", [message], CancellationToken.None);
+            return hub.Clients.Client(connectionId).SendAsync("NewUserMessage", message, CancellationToken.None);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        /// <param name="connectionId"></param>
-        /// <param name="pushResult"></param>
+        /// <param name="message"></param>
+        /// <param name="user"></param>
         /// <returns></returns>
-        public Task SendPushResult(string connectionId, SendMessageResult pushResult)
+        public Task SendReadedNotify(MessageDTO message, User user)
         {
-            return hub.Clients.Client(connectionId).SendCoreAsync("MessageResult", [pushResult]);
+            return hub.Clients.Client(user.ConnectionId!).SendAsync("NotifyRead", message);
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public Task SendReadedNotify(MessageDTO message)
+        {
+            return hub.Clients.All.SendAsync("NotifyRead", message);
         }
     }
 }

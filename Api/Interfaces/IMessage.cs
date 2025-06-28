@@ -1,5 +1,4 @@
-﻿using Api.Data.Entity;
-using Shared;
+﻿using Shared;
 using Shared.Results;
 
 namespace Api.Interfaces
@@ -7,16 +6,16 @@ namespace Api.Interfaces
     public interface IMessage
     {
         /// <summary>
-        /// Отправить сообщение пользователю
+        /// Получатель прочитал сообщение, оповещаем об этом обоих пользователей
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="messageDTO"></param>
         /// <returns></returns>
-        Task<SendMessageResult> SendMessage(Message message);
+        Task MessageReaded(MessageDTO messageDTO);
         /// <summary>
         /// Пришло новое сообщение от пользователя
         /// </summary>
         /// <param name="messageDTO"></param>
         /// <returns></returns>
-        Task<SendMessageResult> NewMessage(MessageDTO messageDTO);
+        Task<SendMessageResult> NewMessage(NewMessageDTO messageDTO);
     }
 }

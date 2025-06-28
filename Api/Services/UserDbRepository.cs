@@ -13,6 +13,16 @@ namespace Api.Services
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        /// <returns></returns>
+        public async Task ClearAllConnections()
+        {
+            await db.Users
+                .ExecuteUpdateAsync(s =>
+                    s.SetProperty(u => u.ConnectionId, u => null));
+        }
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         /// <param name="login"></param>
         /// <param name="connectionId"></param>
         /// <returns></returns>
@@ -35,9 +45,9 @@ namespace Api.Services
         public async Task DisconnectUser(string connectionId)
         {
             await db.Users
-                     .Where(u => u.ConnectionId == connectionId)
-                     .ExecuteUpdateAsync(s =>
-                         s.SetProperty(u => u.ConnectionId, u => null));
+                            .Where(u => u.ConnectionId == connectionId)
+                            .ExecuteUpdateAsync(s =>
+                                s.SetProperty(u => u.ConnectionId, u => null));
         }
         /// <summary>
         /// <inheritdoc/>

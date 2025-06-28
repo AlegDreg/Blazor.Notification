@@ -1,0 +1,48 @@
+﻿@using Shared
+
+<RadzenDataGrid TItem="MessageDTO" Data="Messages" @ref=dataGrid PageSize="50">
+    <Columns>
+        <RadzenDataGridColumn TItem="MessageDTO" Title="Прочитано" Property="Readed" Width="100px">
+            <Template>
+                <input type="checkbox" checked="@context.Readed" class="readonly-checkbox" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="MessageDTO" Title="Текст" Property="Message" />
+        <RadzenDataGridColumn TItem="MessageDTO" Title="Отправитель" Property="FromLogin" />
+        <RadzenDataGridColumn TItem="MessageDTO" Title="Получатель" Property="ToLogin">
+            <Template>
+                <span class="@RecieverCssClass(context)">@context.ToLogin</span>
+            </Template>
+
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="MessageDTO" Title="Дата отправки" Property="DateTime" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private RadzenDataGrid<MessageDTO> dataGrid;
+
+    [Parameter]
+    [EditorRequired]
+    public List<MessageDTO> Messages { get; set; }
+    /// <summary>
+    /// Логин текущего пользователя
+    /// </summary>
+    [Parameter]
+    public string? UserLogin { get; set; }
+
+    /// <summary>
+    /// Получить css класс для ячейки Получатель в таблице
+    /// </summary>
+    /// <param name="messageDTO"></param>
+    /// <returns></returns>
+    private string RecieverCssClass(MessageDTO messageDTO) => messageDTO.ToLogin == UserLogin ? "me-reciever-fill" : string.Empty;
+    /// <summary>
+    /// Обновить состояние компонента
+    /// </summary>
+    /// <returns></returns>
+    public async Task Refresh()
+    {
+        await dataGrid.RefreshDataAsync();
+    }
+}

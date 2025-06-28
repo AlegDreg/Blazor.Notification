@@ -1,5 +1,6 @@
 ﻿using Api.Data.Entity;
 using Api.Interfaces;
+using Api.Interfaces.MessageRequests;
 using Shared;
 using Shared.Results;
 
@@ -8,50 +9,109 @@ namespace Api.Services
     /// <summary>
     /// Сервис для управления сообщениями пользователей
     /// </summary>
-    /// <param name="messageHub"></param>
+    /// <param name="notifyRequests"></param>
     /// <param name="messageRepository"></param>
     /// <param name="userRepository"></param>
-    public class MessageService(ISignalrRequest request, IMessageRepository messageRepository, IUserRepository userRepository) : IMessage
+    public class MessageService(IMessageNotifyRequests notifyRequests, IMessageRepository messageRepository, IMessageDeliveryRequests messageDelivery, IUserRepository userRepository) : IMessage
     {
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
         /// <param name="messageDTO"></param>
         /// <returns></returns>
-        public async Task<SendMessageResult> NewMessage(MessageDTO messageDTO)
+        public async Task MessageReaded(MessageDTO messageDTO)
         {
-            User? user = await userRepository.GetUserByLogin(messageDTO.ToLogin);
+            await messageRepository.MessageDelivered(messageDTO.Id);
 
-            if (user == null)
-                return new SendMessageResult { ErrorMessage = "Адресат не найден" };
+            /*
+            
+            Могли бы сделать так ↓ , если бы у нас был личный чат. Сообщаем обоим пользователям, о прочтении
+             
+             */
 
-            var message = await messageRepository.SaveMessage(messageDTO, user);
-            if (message == null)
-                return new SendMessageResult { ErrorMessage = "Неудалось сохранить сообщение" };
+            //  User toUser = await userRepository.GetUserByLogin(messageDTO.ToLogin) ?? throw new InvalidDataException("Адресат не найден");
+            //  User fromUser = await userRepository.GetUserByLogin(messageDTO.FromLogin) ?? throw new InvalidDataException("Отправитель не найден");
+            //  if (toUser.ConnectionId != null)
+            //      await SendReadedNotify(messageDTO, toUser);
 
-            return await SendMessage(message);
+            //  if (fromUser.ConnectionId != null)
+            //      await SendReadedNotify(messageDTO, fromUser);
+
+            /*
+            
+            Оповещаем всех пользователей, т.к. у нас глобальный чат
+
+             */
+            await SendReadedNotify(messageDTO);
         }
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        /// <param name="messageDTO"></param>
+        /// <returns></returns>
+        public async Task<SendMessageResult> NewMessage(NewMessageDTO messageDTO)
+        {
+            User? toUser = await userRepository.GetUserByLogin(messageDTO.ToLogin);
+            if (toUser == null)
+                return new SendMessageResult { ErrorMessage = "Адресат не найден" };
+
+            if (toUser.ConnectionId == null)
+                return new SendMessageResult { ErrorMessage = "Получатель не подключен" };
+
+            User? fromUser = await userRepository.GetUserByLogin(messageDTO.FromLogin) ?? throw new InvalidDataException("Отправитель не найден");
+
+            var message = await messageRepository.SaveMessage(messageDTO, fromUser, toUser);
+            if (message == null)
+                return new SendMessageResult { ErrorMessage = "Неудалось сохранить сообщение" };
+
+            var result = await SendMessage(message);
+
+            await SendNotifyNewMessage(message);
+
+            return result;
+        }
+        /// <summary>
+        /// Отправить получателю пуш с сообщением
+        /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public async Task<SendMessageResult> SendMessage(Message message)
+        private async Task<SendMessageResult> SendMessage(Message message)
         {
             ArgumentNullException.ThrowIfNull(message.To);
 
-            if (message.To.ConnectionId == null)
-                return new SendMessageResult { ErrorMessage = "Пользователь не подключен" };
+            await messageDelivery.SendPush(message.To.ConnectionId!, (MessageDTO)message);
 
-            Ping result = await request.SendPush(message.To.ConnectionId, (MessageDTO)message);
+            return new SendMessageResult();
+        }
+        /// <summary>
+        /// Отправить сообщением все подключенным пользователям (кроме получателя) о новом сообщении
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private Task SendNotifyNewMessage(Message message)
+        {
+            ArgumentNullException.ThrowIfNull(message.To);
 
-            if (result != null && result.Success)
-            {
-                await messageRepository.MessageDelivered(message);
-                return new SendMessageResult();
-            }
-            else
-                return new SendMessageResult { ErrorMessage = "Неудалось отправить сообщение" };
+            return notifyRequests.SendNotifyPush(message.To.ConnectionId!, (MessageDTO)message);
+        }
+        /// <summary>
+        /// Отправить пользователю данные о том, что сообщение прочитанно
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private async Task SendReadedNotify(MessageDTO message, User user)
+        {
+            await notifyRequests.SendReadedNotify(message, user);
+        }
+        /// <summary>
+        /// Отправить всем пользователям данные о том, что сообщение прочитанно
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private async Task SendReadedNotify(MessageDTO message)
+        {
+            await notifyRequests.SendReadedNotify(message);
         }
     }
 }

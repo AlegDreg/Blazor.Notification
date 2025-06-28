@@ -1,3 +1,114 @@
-﻿@page "/"
+﻿@using Shared
+@using UI.Components
+@using UI.Interfaces
+@using UI.Interfaces.MessageActions
+@using UI.Interfaces.MessageRequests
+@using UI.Interfaces.Messages
+@inject IAuthorize auth
+@inject IAuthRepository authRepo
+@inject IMessageTracking messageTracking
+@inject IMessageRecieve messageRecieve
+@inject IMessageStateRequests messageState
+@inject IJsService js
+@inject NavigationManager nav
+@implements IDisposable
+@page "/"
 
+<PageTitle>Главная</PageTitle>
 
+<div class="send-form">
+    <SendPushComponent />
+</div>
+
+<div>
+    <MessageTableComponent Messages="messages" UserLogin="@userLogin" @ref=tableComponent/>
+</div>
+
+@code {
+    private MessageTableComponent tableComponent;
+    private List<MessageDTO> messages = new List<MessageDTO>();
+    private string? userLogin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await auth.IsAuthorized())
+        {
+            nav.NavigateTo("/login");
+            return;
+        }
+
+        messageTracking.GlobalMessageRecieved += GlobalMessageRecieved;
+        messageTracking.PersonalMessageReceived += PersonalMessageReceived;
+        messageTracking.MessageReaded += MessageReaded;
+
+        userLogin = (await authRepo.GetUserLogin())!;
+
+        await LoadMessages();
+    }
+    /// <summary>
+    /// Загрузить сообщения с бэка
+    /// </summary>
+    /// <returns></returns>
+    private async Task LoadMessages()
+    {
+        messages = await messageRecieve.GetMessages(0, int.MaxValue);
+        await tableComponent.Refresh();
+    }
+    /// <summary>
+    /// В системе появился новый пуш
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="message"></param>
+    private async void GlobalMessageRecieved(object? sender, MessageDTO message)
+    {
+        await InsertMessage(message);
+    }
+
+    private async void PersonalMessageReceived(object? sender, MessageDTO message)
+    {
+        await InsertMessage(message);
+        await js.SendAlert(message.Message, message.FromLogin);
+
+        await messageState.SendReadedMessage(message);
+    }
+    /// <summary>
+    /// Сообщение было прочитано
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="message"></param>
+    private async void MessageReaded(object? sender, MessageDTO message)
+    {
+        var messageInList = messages.FirstOrDefault(x => x.Id == message.Id);
+        if (messageInList != null)
+        {
+            messageInList.Readed = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    /// <summary>
+    /// Добавить сообщение в таблицу и обновить её
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    private async Task InsertMessage(MessageDTO message)
+    {
+        var index = messages.FindIndex(x => x.Id == message.Id);
+        if (index >= 0)
+        {
+            messages[index] = message;
+        }
+        else
+        {
+            messages.Insert(0, message);
+        }
+
+        await tableComponent.Refresh();
+    }
+
+    public void Dispose()
+    {
+        messageTracking.MessageReaded -= MessageReaded;
+        messageTracking.GlobalMessageRecieved -= GlobalMessageRecieved;
+        messageTracking.PersonalMessageReceived -= PersonalMessageReceived;
+    }
+}

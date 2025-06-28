@@ -1,0 +1,78 @@
+﻿@using UI.Interfaces
+@using UI.Interfaces.Messages
+@inject IMessageDelivery messageService
+
+<RadzenRow>
+    <RadzenColumn>
+        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Логин получателя</RadzenText>
+        <RadzenTextBox ValueChanged="@(args=> loginReciever = args)" Style="width: 100%" />
+    </RadzenColumn>
+
+    <RadzenColumn>
+        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Сообщение</RadzenText>
+        <RadzenTextBox Value="@message" ValueChanged="@(args=> message = args)" Style="width: 100%" />
+    </RadzenColumn>
+
+    <div style="display: flex; align-items: center;">
+        <RadzenButton Text="Отправить" Disabled="sending" Click="Send" />
+    </div>
+</RadzenRow>
+@if (errorMessage != null)
+{
+    <span style="color:red">@errorMessage</span>
+}
+
+@code {
+    /// <summary>
+    /// Логин получателя для отправки
+    /// </summary>
+    private string? loginReciever;
+    /// <summary>
+    /// Текст сообщения для отправки
+    /// </summary>
+    private string? message;
+    /// <summary>
+    /// Идёт ли отправка
+    /// </summary>
+    private bool sending = false;
+    /// <summary>
+    /// Текст об ошибки
+    /// </summary>
+    private string? errorMessage;
+
+    private async Task Send()
+    {
+        if (string.IsNullOrWhiteSpace(loginReciever))
+        {
+            errorMessage = "Укажите логин получателя";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            errorMessage = "Укажите текст сообщения";
+            return;
+        }
+        errorMessage = null;
+        sending = true;
+        await InvokeAsync(StateHasChanged);
+
+        var result = await messageService.SendMessage(message, loginReciever);
+
+        if (result != null && result.Success)
+        {
+            ClearFields();
+        }
+        else
+        {
+            errorMessage = result?.ErrorMessage ?? "Неудалось отправить";
+        }
+
+        sending = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ClearFields()
+    {
+        message = null;
+    }
+}

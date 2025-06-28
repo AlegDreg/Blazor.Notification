@@ -22,5 +22,10 @@
         {
             User = user;
         }
+
+        public AuthResult()
+        {
+
+        }
     }
 }

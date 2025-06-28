@@ -30,3 +30,36 @@ h1:focus {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+
+html, body, #app {
+    height: 100%;
+}
+
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.bottom-button {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.send-form {
+    max-width: 500px;
+    padding: 10px;
+    box-shadow: 4px 4px 8px 0px rgba(34, 60, 80, 0.2);
+    margin: 0px 0px 17px 14px;
+}
+
+.readonly-checkbox {
+    pointer-events: none;
+}
+
+.me-reciever-fill {
+    color: green;
+    font-weight: 800;
+}

@@ -1,5 +1,16 @@
-﻿@inherits LayoutComponentBase
+﻿@using UI.Interfaces
+@inherits LayoutComponentBase
+@inject IWebRequest web
 
-<main>
-    @Body
-</main>
+<HeadContent>
+    <RadzenTheme Theme="material" />
+</HeadContent>
+
+@Body
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await web.Connect();
+    }
+}

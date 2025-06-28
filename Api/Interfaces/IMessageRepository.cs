@@ -10,7 +10,7 @@ namespace Api.Interfaces
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        Task<Message?> SaveMessage(MessageDTO message, User toUser);
+        Task<Message?> SaveMessage(NewMessageDTO message, User fromUser, User toUser);
         /// <summary>
         /// Получить сообщения
         /// </summary>
@@ -23,5 +23,10 @@ namespace Api.Interfaces
         /// </summary>
         /// <param name="message"></param>
         Task MessageDelivered(Message message);
+        /// <summary>
+        /// Сообщение доставлено
+        /// </summary>
+        /// <param name="messageId"></param>
+        Task MessageDelivered(int messageId);
     }
 }

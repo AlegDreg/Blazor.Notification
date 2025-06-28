@@ -32,5 +32,10 @@ namespace Api.Interfaces
         /// <param name="connectionId"></param>
         /// <returns></returns>
         Task SetUserConnectionId(User dbUser, string connectionId);
+        /// <summary>
+        /// Удалить все айди подключений при запуске приложения
+        /// </summary>
+        /// <returns></returns>
+        public Task ClearAllConnections();
     }
 }
