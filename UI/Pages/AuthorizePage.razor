@@ -10,7 +10,7 @@
     <RadzenColumn>
         <h3>Пожалуйста, авторизуйтесь</h3>
         <RadzenCard>
-            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Логин</RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Логин (можно придумать новый)</RadzenText>
             <RadzenTextBox @oninput=@(args=>login=args.Value?.ToString()) Style="width: 100%" @onkeydown="HandleKeyDown" @ref=input />
             @if (errorMessage != null)
             {
