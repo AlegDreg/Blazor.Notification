@@ -37,7 +37,11 @@ namespace Api.Controllers
 
             return pushResult;
         }
-
+        /// <summary>
+        /// Получить список сообщений
+        /// </summary>
+        /// <param name="messageRequest"></param>
+        /// <returns></returns>
         public async Task<IReadOnlyList<MessageDTO>> GetMessages(MessageRequestDTO messageRequest)
         {
             return await messageRepository.GetMessages(messageRequest.Skip, messageRequest.Task);

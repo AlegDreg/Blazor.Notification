@@ -45,9 +45,9 @@ namespace Api.Services
         public async Task DisconnectUser(string connectionId)
         {
             await db.Users
-                            .Where(u => u.ConnectionId == connectionId)
-                            .ExecuteUpdateAsync(s =>
-                                s.SetProperty(u => u.ConnectionId, u => null));
+                .Where(u => u.ConnectionId == connectionId)
+                .ExecuteUpdateAsync(s =>
+                    s.SetProperty(u => u.ConnectionId, u => null));
         }
         /// <summary>
         /// <inheritdoc/>

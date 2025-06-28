@@ -20,7 +20,7 @@ namespace Api
 
             builder.Services.AddHostedService(services =>
             {
-                return new BackgroundNotifier(services);
+                return new BackgroundHostedNotifier(services);
             });
 
             builder.Services.AddSignalR();
@@ -30,7 +30,11 @@ namespace Api
             builder.Services.AddScoped<IMessageRepository, MessageDbRepository>();
             builder.Services.AddScoped<IUserConnection, UserConnectionService>();
             builder.Services.AddScoped<IUserRepository, UserDbRepository>();
+
             builder.Services.AddScoped<IMessageNotifyRequests, SignalrService>();
+            builder.Services.AddScoped<IMessageDeliveryRequests, SignalrService>();
+
+            builder.Services.AddScoped<IBackgroundMessages, BackgroundMessageService>();
 
             builder.Services.AddCors(options =>
             {

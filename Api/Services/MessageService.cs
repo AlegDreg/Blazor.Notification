@@ -19,6 +19,7 @@ namespace Api.Services
         /// </summary>
         /// <param name="messageDTO"></param>
         /// <returns></returns>
+        /// <exception cref="InvalidDataException"></exception>
         public async Task MessageReaded(MessageDTO messageDTO)
         {
             await messageRepository.MessageDelivered(messageDTO.Id);
@@ -31,6 +32,7 @@ namespace Api.Services
 
             //  User toUser = await userRepository.GetUserByLogin(messageDTO.ToLogin) ?? throw new InvalidDataException("Адресат не найден");
             //  User fromUser = await userRepository.GetUserByLogin(messageDTO.FromLogin) ?? throw new InvalidDataException("Отправитель не найден");
+
             //  if (toUser.ConnectionId != null)
             //      await SendReadedNotify(messageDTO, toUser);
 
@@ -49,6 +51,7 @@ namespace Api.Services
         /// </summary>
         /// <param name="messageDTO"></param>
         /// <returns></returns>
+        /// <exception cref="InvalidDataException"/>
         public async Task<SendMessageResult> NewMessage(NewMessageDTO messageDTO)
         {
             User? toUser = await userRepository.GetUserByLogin(messageDTO.ToLogin);

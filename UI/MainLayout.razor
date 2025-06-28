@@ -1,6 +1,6 @@
 ﻿@using UI.Interfaces
 @inherits LayoutComponentBase
-@inject IWebRequest web
+@inject IAppInitializer appInitializer
 
 <HeadContent>
     <RadzenTheme Theme="material" />
@@ -11,6 +11,6 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
-        await web.Connect();
+        await appInitializer.InitAsync();
     }
 }

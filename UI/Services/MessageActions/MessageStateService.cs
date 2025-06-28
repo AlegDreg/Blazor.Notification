@@ -12,6 +12,7 @@ namespace UI.Services.MessageActions
         public event EventHandler<MessageDTO> GlobalMessageRecieved;
         public event EventHandler<MessageDTO> PersonalMessageReceived;
         public event EventHandler<MessageDTO> MessageReaded;
+        public event EventHandler<string> NewBackgroundMessage;
 
         public MessageStateService(IWebRequest webRequest)
         {
@@ -31,6 +32,12 @@ namespace UI.Services.MessageActions
             {
                 MessageReaded?.Invoke(this, messageDTO);
             });
+
+            webRequest.HubConnection.On<string>("BackgroundPush", (messageDTO) =>
+            {
+                NewBackgroundMessage?.Invoke(this, messageDTO);
+            });
+
             this.webRequest = webRequest;
         }
     }

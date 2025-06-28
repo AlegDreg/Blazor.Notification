@@ -11,7 +11,7 @@
         <h3>Пожалуйста, авторизуйтесь</h3>
         <RadzenCard>
             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Логин</RadzenText>
-            <RadzenTextBox ValueChanged="@(args=> login = args)" Style="width: 100%" @onkeydown="HandleKeyDown" />
+            <RadzenTextBox @oninput=@(args=>login=args.Value?.ToString()) Style="width: 100%" @onkeydown="HandleKeyDown" @ref=input />
             @if (errorMessage != null)
             {
                 <span style="color:red">@errorMessage</span>
@@ -26,9 +26,19 @@
 </div>
 
 @code {
+    private RadzenTextBox input;
+
     private string? errorMessage;
     private string? login;
     private bool loading = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await input.FocusAsync();
+        }
+    }
 
     private async void HandleKeyDown(KeyboardEventArgs e)
     {

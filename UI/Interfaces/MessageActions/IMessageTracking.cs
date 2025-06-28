@@ -19,5 +19,9 @@ namespace UI.Interfaces.MessageActions
         /// Сообщение прочли
         /// </summary>
         event EventHandler<MessageDTO> MessageReaded;
+        /// <summary>
+        /// Событие о получении нового фонового сообщения
+        /// </summary>
+        event EventHandler<string> NewBackgroundMessage;
     }
 }

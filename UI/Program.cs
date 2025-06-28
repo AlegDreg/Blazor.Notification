@@ -40,6 +40,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddSingleton<IJsService, JsService>();
 builder.Services.AddSingleton<IWebRequest, WebRequestService>();
+builder.Services.AddSingleton<IAppInitializer, AppInitializer>();
 
 builder.Services.AddScoped<IAuthorize, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepositoryService>();
@@ -52,6 +53,9 @@ builder.Services.AddScoped<IMessageRecieveRequests, WebRequestService>();
 builder.Services.AddScoped<IMessageDelivery, MessageDeliveryService>();
 builder.Services.AddScoped<IMessageRecieve, MessageRecieveService>();
 builder.Services.AddSingleton<IMessageTracking, MessageStateService>();
+
+builder.Services.AddSingleton<BackgroundMessageRouter>();
+builder.Services.AddSingleton<IBackgroundMessageHandle, BackgroundMessageAlert>();
 
 builder.Services.AddSingleton(sp =>
 {

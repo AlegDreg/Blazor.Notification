@@ -3,12 +3,16 @@ using Timer = System.Timers.Timer;
 
 namespace Api.Services
 {
-    public class BackgroundNotifier(IServiceProvider provider) : IHostedService, IDisposable
+    /// <summary>
+    /// Сервис для отправки всем клиентам сообщения раз в заданный интервал
+    /// </summary>
+    /// <param name="provider"></param>
+    public class BackgroundHostedNotifier(IServiceProvider provider) : IHostedService, IDisposable
     {
         /// <summary>
         /// Интервал в мс между отправками сообщений
         /// </summary>
-        private const int TimerDelay = 60_000; // раз в минуту
+        private const int TimerDelay = 30_000; // раз в 30 секунд
         /// <summary>
         /// Сообщение для всех пользователей
         /// </summary>
