@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.Interfaces;
 using Api.Interfaces.MessageRequests;
 using Api.Services;
+using Api.Services.BackgroundServices;
 using Microsoft.EntityFrameworkCore;
 
 /*
@@ -14,14 +15,12 @@ namespace Api
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddHostedService(services =>
-            {
-                return new BackgroundHostedNotifier(services);
-            });
+            builder.Services.AddHostedService<BackgroundHostedNotifier>();
+            builder.Services.AddHostedService<DbPrepareService>();
 
             builder.Services.AddSignalR();
 
@@ -57,17 +56,6 @@ namespace Api
             app.UseAuthorization();
 
             app.MapHub<MessageHub>("/hub");
-
-            var scoppe = app.Services.CreateScope();
-            try
-            {
-                await scoppe.ServiceProvider.GetRequiredService<IUserRepository>().ClearAllConnections();
-
-            }
-            finally
-            {
-                scoppe.Dispose();
-            }
 
             app.Run();
         }

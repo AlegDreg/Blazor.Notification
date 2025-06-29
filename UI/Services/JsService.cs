@@ -21,5 +21,10 @@ namespace UI.Services
         {
             await js.InvokeVoidAsync("NewAlert", message, fromLogin);
         }
+
+        public async Task SendError(string text, string title)
+        {
+            await js.InvokeVoidAsync("NewError", text, title);
+        }
     }
 }

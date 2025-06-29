@@ -26,6 +26,12 @@ namespace UI.Services
                 await hub.StartAsync();
         }
 
+        /*
+         
+            Можно дополнтельно вызывать автоподключение, если но не установлено, или возвращать Result<T> с текстом ошибки, или кастомное исключение пробрасывать
+         
+         */
+
         public async Task<List<MessageDTO>> GetMessages(int skip, int take)
         {
             return await hub.InvokeAsync<List<MessageDTO>>("GetMessages", new MessageRequestDTO { Skip = skip, Task = take });

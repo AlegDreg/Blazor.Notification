@@ -1,6 +1,7 @@
 ﻿@using UI.Interfaces
 @inherits LayoutComponentBase
 @inject IAppInitializer appInitializer
+@inject IJsService js
 
 <HeadContent>
     <RadzenTheme Theme="material" />
@@ -11,6 +12,13 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
-        await appInitializer.InitAsync();
+        try
+        {
+            await appInitializer.InitAsync();
+        }
+        catch (Exception ex)
+        {
+            await js.SendError(ex.Message, "Ошибка подключения");
+        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Api.Interfaces.MessageRequests;
 using Timer = System.Timers.Timer;
 
-namespace Api.Services
+namespace Api.Services.BackgroundServices
 {
     /// <summary>
     /// Сервис для отправки всем клиентам сообщения раз в заданный интервал
